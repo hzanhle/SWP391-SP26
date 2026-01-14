@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useState, useEffect, ReactNode } from 'react';
+import Logo from '../../assets/Logo.png';
 
 interface SidebarItem {
   path: string;
@@ -32,7 +33,11 @@ export const Sidebar = ({ items }: SidebarProps) => {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-2"
         >
-          <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-lg" />
+          <img
+            src={Logo}
+            alt="EcoCollect logo"
+            className="w-8 h-8 object-contain"
+          />
           <span className="font-bold text-xl text-gray-900">EcoCollect</span>
         </motion.div>
       </div>
