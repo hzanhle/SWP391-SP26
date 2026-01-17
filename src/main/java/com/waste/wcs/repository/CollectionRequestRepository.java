@@ -1,4 +1,0 @@
-package com.waste.wcs.repository;
-
-public class CollectionRequestRepository {
-}
