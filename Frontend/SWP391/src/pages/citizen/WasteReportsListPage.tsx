@@ -4,68 +4,34 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import type { WasteReport } from '../../types';
+import { usePlatform } from '../../mock/usePlatform';
 
-// Mock data
-const mockReports: WasteReport[] = [
-  {
-    id: '1',
-    title: 'Illegal Dumping on Main Street',
-    description: 'Large pile of construction waste',
-    location: { address: '123 Main St', lat: 0, lng: 0 },
-    status: 'completed',
-    category: 'Construction Waste',
-    images: [],
-    createdAt: '2024-01-10T10:00:00Z',
-    updatedAt: '2024-01-11T15:00:00Z',
-    reportedBy: 'user1',
-  },
-  {
-    id: '2',
-    title: 'Plastic Bottles in Park',
-    description: 'Multiple plastic bottles scattered',
-    location: { address: 'Central Park', lat: 0, lng: 0 },
-    status: 'in-progress',
-    category: 'Plastic',
-    images: [],
-    createdAt: '2024-01-12T14:30:00Z',
-    updatedAt: '2024-01-12T14:30:00Z',
-    reportedBy: 'user1',
-  },
-  {
-    id: '3',
-    title: 'Abandoned Furniture',
-    description: 'Old sofa left on sidewalk',
-    location: { address: '456 Oak Ave', lat: 0, lng: 0 },
-    status: 'pending',
-    category: 'Furniture',
-    images: [],
-    createdAt: '2024-01-13T09:15:00Z',
-    updatedAt: '2024-01-13T09:15:00Z',
-    reportedBy: 'user1',
-  },
-  {
-    id: '4',
-    title: 'Hazardous Waste Spill',
-    description: 'Chemical containers leaking',
-    location: { address: '789 Industrial Blvd', lat: 0, lng: 0 },
-    status: 'pending',
-    category: 'Hazardous Waste',
-    images: [],
-    createdAt: '2024-01-13T11:00:00Z',
-    updatedAt: '2024-01-13T11:00:00Z',
-    reportedBy: 'user1',
-  },
-];
+const reportStatusFilters = ['all', 'pending', 'accepted', 'assigned', 'collected', 'rejected'] as const;
 
 export const WasteReportsListPage = () => {
   const navigate = useNavigate();
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const { state } = usePlatform();
+  const [filterStatus, setFilterStatus] = useState<(typeof reportStatusFilters)[number]>('all');
 
+  const myReports = state.reports.filter((r) => r.citizenId === 'user1');
   const filteredReports =
-    filterStatus === 'all'
-      ? mockReports
-      : mockReports.filter((report) => report.status === filterStatus);
+    filterStatus === 'all' ? myReports : myReports.filter((r) => r.status === filterStatus);
+
+  const toBadgeStatus = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'pending';
+      case 'accepted':
+      case 'assigned':
+        return 'in-progress';
+      case 'collected':
+        return 'completed';
+      case 'rejected':
+        return 'rejected';
+      default:
+        return 'pending';
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -83,7 +49,7 @@ export const WasteReportsListPage = () => {
       {/* Filters */}
       <Card className="p-4">
         <div className="flex gap-2">
-          {['all', 'pending', 'in-progress', 'completed', 'rejected'].map((status) => (
+          {reportStatusFilters.map((status) => (
             <motion.button
               key={status}
               onClick={() => setFilterStatus(status)}
@@ -150,7 +116,7 @@ export const WasteReportsListPage = () => {
                     <div className="text-sm text-gray-900">{report.category}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <Badge status={report.status} />
+                    <Badge status={toBadgeStatus(report.status)} label={report.status} />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(report.createdAt).toLocaleDateString()}

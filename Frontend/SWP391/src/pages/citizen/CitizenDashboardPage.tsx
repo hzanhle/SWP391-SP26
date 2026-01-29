@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import type { WasteReport } from '../../types';
+import { LeafletMap } from '../../components/maps/LeafletMap';
 
 // Mock data
 const mockStats = {
@@ -66,12 +67,14 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.3, ease: 'easeOut' },
+    // Keep transition minimal; page already eases in at layout level
+    transition: { duration: 0.3 },
   },
 };
 
 export const CitizenDashboardPage = () => {
   const navigate = useNavigate();
+  const cityCenter = { lat: 10.8231, lng: 106.6297 }; // HCMC as default demo center
 
   return (
     <div className="space-y-6">
@@ -93,7 +96,7 @@ export const CitizenDashboardPage = () => {
           { label: 'Completed', value: mockStats.completedReports, color: 'bg-green-500' },
           { label: 'Pending', value: mockStats.pendingReports, color: 'bg-yellow-500' },
           { label: 'Total Points', value: mockStats.totalPoints, color: 'bg-purple-500' },
-        ].map((stat, index) => (
+        ].map((stat) => (
           <motion.div key={stat.label} variants={itemVariants}>
             <Card hoverable className="p-6">
               <div className="flex items-center justify-between">
@@ -120,9 +123,25 @@ export const CitizenDashboardPage = () => {
       >
         <Card className="p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Report Locations</h2>
-          <div className="h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-            <p className="text-gray-500">Map visualization would go here</p>
-          </div>
+          <LeafletMap
+            center={cityCenter}
+            markers={[
+              {
+                id: 'r-1',
+                title: 'Report: Main St',
+                description: 'Construction waste',
+                lat: 10.8231,
+                lng: 106.6297,
+              },
+              {
+                id: 'r-2',
+                title: 'Report: Central Park',
+                description: 'Plastic',
+                lat: 10.8298,
+                lng: 106.6356,
+              },
+            ]}
+          />
         </Card>
       </motion.div>
 

@@ -49,12 +49,3 @@ export interface LeaderboardEntry {
   points: number;
 }
 
-// Re-export all types for easier importing
-export type {
-  User,
-  WasteReport,
-  StatusTimelineItem,
-  Reward,
-  LeaderboardEntry,
-};
-

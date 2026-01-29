@@ -2,43 +2,32 @@ import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
-import type { StatusTimelineItem } from '../../types';
+import { LeafletMap } from '../../components/maps/LeafletMap';
+import { usePlatform } from '../../mock/usePlatform';
 
-// Mock data
-const mockReport = {
-  id: '1',
-  title: 'Illegal Dumping on Main Street',
-  description: 'Large pile of construction waste including broken concrete, metal pipes, and wood debris. The waste has been here for over a week and is blocking the sidewalk.',
-  location: { address: '123 Main Street, Downtown District', lat: 0, lng: 0 },
-  status: 'completed' as const,
-  category: 'Construction Waste',
-  images: [],
-  createdAt: '2024-01-10T10:00:00Z',
-  updatedAt: '2024-01-11T15:00:00Z',
-  reportedBy: 'user1',
+const toBadgeStatus = (status: string) => {
+  switch (status) {
+    case 'pending':
+      return 'pending';
+    case 'accepted':
+    case 'assigned':
+      return 'in-progress';
+    case 'collected':
+      return 'completed';
+    case 'rejected':
+      return 'rejected';
+    default:
+      return 'pending';
+  }
 };
-
-const mockTimeline: StatusTimelineItem[] = [
-  {
-    status: 'pending',
-    date: '2024-01-10T10:00:00Z',
-    description: 'Report submitted',
-  },
-  {
-    status: 'in-progress',
-    date: '2024-01-11T08:00:00Z',
-    description: 'Report assigned to collection team',
-  },
-  {
-    status: 'completed',
-    date: '2024-01-11T15:00:00Z',
-    description: 'Waste collected and area cleaned',
-  },
-];
 
 export const WasteReportDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { state } = usePlatform();
+
+  const report = state.reports.find((r) => r.id === id) ?? state.reports[0];
+  if (!report) return null;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -55,8 +44,8 @@ export const WasteReportDetailPage = () => {
             Back to Reports
           </button>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">{mockReport.title}</h1>
-            <Badge status={mockReport.status} />
+            <h1 className="text-2xl font-bold text-gray-900">{report.title}</h1>
+            <Badge status={toBadgeStatus(report.status)} label={report.status} />
           </div>
           <p className="text-gray-600 mt-2">Report ID: {id}</p>
         </div>
@@ -68,7 +57,7 @@ export const WasteReportDetailPage = () => {
           {/* Description */}
           <Card className="p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Description</h2>
-            <p className="text-gray-700 leading-relaxed">{mockReport.description}</p>
+            <p className="text-gray-700 leading-relaxed">{report.description}</p>
           </Card>
 
           {/* Images */}
@@ -84,10 +73,19 @@ export const WasteReportDetailPage = () => {
           {/* Location */}
           <Card className="p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Location</h2>
-            <p className="text-gray-700 mb-4">{mockReport.location.address}</p>
-            <div className="h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-              <p className="text-gray-500">Map would go here</p>
-            </div>
+            <p className="text-gray-700 mb-4">{report.location.address}</p>
+            <LeafletMap
+              center={{ lat: report.location.lat, lng: report.location.lng }}
+              markers={[
+                {
+                  id: 'report',
+                  title: 'Reported location',
+                  description: report.location.address,
+                  lat: report.location.lat,
+                  lng: report.location.lng,
+                },
+              ]}
+            />
           </Card>
         </div>
 
@@ -99,18 +97,18 @@ export const WasteReportDetailPage = () => {
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-gray-500">Category</p>
-                <p className="text-sm font-medium text-gray-900 mt-1">{mockReport.category}</p>
+                <p className="text-sm font-medium text-gray-900 mt-1">{report.category}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Reported</p>
                 <p className="text-sm font-medium text-gray-900 mt-1">
-                  {new Date(mockReport.createdAt).toLocaleDateString()}
+                  {new Date(report.createdAt).toLocaleDateString()}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Last Updated</p>
                 <p className="text-sm font-medium text-gray-900 mt-1">
-                  {new Date(mockReport.updatedAt).toLocaleDateString()}
+                  {new Date(report.updatedAt).toLocaleDateString()}
                 </p>
               </div>
             </div>
@@ -120,7 +118,15 @@ export const WasteReportDetailPage = () => {
           <Card className="p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Status Timeline</h2>
             <div className="space-y-4">
-              {mockTimeline.map((item, index) => (
+              {[
+                { status: 'pending', label: 'Report submitted' },
+                ...(report.status !== 'pending' ? [{ status: 'accepted', label: 'Accepted by enterprise' }] : []),
+                ...(report.status === 'assigned' || report.status === 'collected'
+                  ? [{ status: 'assigned', label: 'Assigned to collector' }]
+                  : []),
+                ...(report.status === 'collected' ? [{ status: 'collected', label: 'Collected' }] : []),
+                ...(report.status === 'rejected' ? [{ status: 'rejected', label: 'Rejected' }] : []),
+              ].map((item, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, x: -10 }}
@@ -128,16 +134,14 @@ export const WasteReportDetailPage = () => {
                   transition={{ delay: index * 0.1 }}
                   className="relative pl-6 pb-4 last:pb-0"
                 >
-                  {index < mockTimeline.length - 1 && (
+                  {index < 4 && (
                     <div className="absolute left-2 top-6 bottom-0 w-0.5 bg-gray-200" />
                   )}
                   <div className="absolute left-0 top-1 w-4 h-4 bg-primary-600 rounded-full border-2 border-white" />
                   <div>
-                    <Badge status={item.status} className="mb-2" />
-                    <p className="text-sm font-medium text-gray-900">{item.description}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(item.date).toLocaleDateString()}
-                    </p>
+                    <Badge status={toBadgeStatus(item.status)} label={item.status} className="mb-2" />
+                    <p className="text-sm font-medium text-gray-900">{item.label}</p>
+                    <p className="text-xs text-gray-500 mt-1">{new Date(report.updatedAt).toLocaleDateString()}</p>
                   </div>
                 </motion.div>
               ))}
