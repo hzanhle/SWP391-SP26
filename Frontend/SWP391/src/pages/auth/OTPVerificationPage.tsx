@@ -1,7 +1,6 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 
 export const OTPVerificationPage = () => {
@@ -89,7 +88,9 @@ export const OTPVerificationPage = () => {
               {otp.map((digit, index) => (
                 <motion.input
                   key={index}
-                  ref={(el) => (inputRefs.current[index] = el)}
+                  ref={(el) => {
+                    inputRefs.current[index] = el;
+                  }}
                   type="text"
                   inputMode="numeric"
                   maxLength={1}

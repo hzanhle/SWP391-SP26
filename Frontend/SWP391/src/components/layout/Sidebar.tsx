@@ -1,6 +1,7 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { NavLink, useLocation } from 'react-router-dom';
-import { useState, useEffect, ReactNode } from 'react';
+import { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import Logo from '../../assets/Logo.png';
 
 interface SidebarItem {
@@ -15,14 +16,11 @@ interface SidebarProps {
 
 export const Sidebar = ({ items }: SidebarProps) => {
   const location = useLocation();
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  useEffect(() => {
+  // Derived UI state: avoids setState-in-effect lint and reduces renders.
+  const activeIndex = useMemo(() => {
     const index = items.findIndex((item) => location.pathname.startsWith(item.path));
-    if (index !== -1) {
-      setActiveIndex(index);
-    }
-  }, [location.pathname, items]);
+    return index === -1 ? 0 : index;
+  }, [items, location.pathname]);
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 h-screen fixed left-0 top-0 flex flex-col">
@@ -60,7 +58,7 @@ export const Sidebar = ({ items }: SidebarProps) => {
           />
 
           <div className="space-y-1">
-            {items.map((item, index) => {
+            {items.map((item) => {
               const isActive = location.pathname.startsWith(item.path);
               
               return (

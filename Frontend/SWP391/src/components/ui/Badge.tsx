@@ -1,18 +1,27 @@
 import { motion } from 'framer-motion';
-import { HTMLAttributes } from 'react';
+import type { HTMLMotionProps } from 'framer-motion';
 
-interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  status: 'pending' | 'in-progress' | 'completed' | 'rejected';
+type BadgeStatus = 'pending' | 'in-progress' | 'completed' | 'rejected';
+
+export interface BadgeProps extends HTMLMotionProps<'span'> {
+  status: BadgeStatus;
+  /**
+   * Optional override label.
+   * Useful when domain status names differ but we want to reuse the same style tokens.
+   */
+  label?: string;
 }
 
-const statusColors = {
+const statusColors: Record<BadgeStatus, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
   'in-progress': 'bg-blue-100 text-blue-800',
   completed: 'bg-green-100 text-green-800',
   rejected: 'bg-red-100 text-red-800',
 };
 
+// Badge uses a simple scale animation to highlight status transitions
 export const Badge = ({ status, className = '', ...props }: BadgeProps) => {
+  const { label, ...rest } = props;
   return (
     <motion.span
       className={`
@@ -23,9 +32,9 @@ export const Badge = ({ status, className = '', ...props }: BadgeProps) => {
       initial={false}
       animate={{ scale: 1 }}
       transition={{ duration: 0.2 }}
-      {...props}
+      {...rest}
     >
-      {status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ')}
+      {label ?? status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ')}
     </motion.span>
   );
 };

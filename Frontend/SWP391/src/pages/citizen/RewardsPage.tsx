@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { useState } from 'react';
 import { Card } from '../../components/ui/Card';
 import type { LeaderboardEntry } from '../../types';
 

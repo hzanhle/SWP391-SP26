@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
-import { HTMLAttributes, ReactNode } from 'react';
+import type { HTMLMotionProps } from 'framer-motion';
+import type { ReactNode } from 'react';
 
-interface CardProps extends HTMLAttributes<HTMLDivElement> {
+export interface CardProps extends HTMLMotionProps<'div'> {
   children: ReactNode;
   hoverable?: boolean;
 }

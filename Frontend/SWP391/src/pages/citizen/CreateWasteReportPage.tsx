@@ -4,9 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card } from '../../components/ui/Card';
+import { LeafletMap } from '../../components/maps/LeafletMap';
+import { usePlatform } from '../../mock/usePlatform';
+import type { WasteCategory } from '../../mock/platformTypes';
 
 export const CreateWasteReportPage = () => {
   const navigate = useNavigate();
+  const { actions } = usePlatform();
   const [isDragOver, setIsDragOver] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -20,8 +24,19 @@ export const CreateWasteReportPage = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Mock submission
     setTimeout(() => {
+      actions.createReport({
+        title: formData.title,
+        description: formData.description,
+        category: (formData.category || 'other') as WasteCategory,
+        location: {
+          address: formData.location || 'Unknown location',
+          lat: 10.8231,
+          lng: 106.6297,
+        },
+        images: [],
+        citizenId: 'user1',
+      });
       setIsLoading(false);
       navigate('/reports');
     }, 2000);
@@ -140,8 +155,21 @@ export const CreateWasteReportPage = () => {
               placeholder="Enter the address or location"
             />
           </motion.div>
-          <div className="mt-4 h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-            <p className="text-gray-500">Map picker would go here</p>
+          <div className="mt-4">
+            <LeafletMap
+              center={{ lat: 10.8231, lng: 106.6297 }}
+              zoom={13}
+              markers={[
+                {
+                  id: 'pickup',
+                  title: 'Selected location',
+                  description: formData.location || 'Tap/choose location (mock)',
+                  lat: 10.8231,
+                  lng: 106.6297,
+                },
+              ]}
+              className="h-48"
+            />
           </div>
         </Card>
 

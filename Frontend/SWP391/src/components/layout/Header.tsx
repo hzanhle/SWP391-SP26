@@ -14,16 +14,34 @@ interface HeaderProps {
 
 const getPageTitle = (pathname: string): string => {
   const routes: Record<string, string> = {
+    // Citizen routes
     '/dashboard': 'Dashboard',
     '/reports/create': 'Create Report',
     '/reports': 'My Reports',
     '/rewards': 'Rewards',
     '/feedback': 'Feedback',
+    // Enterprise routes
+    '/enterprise/dashboard': 'Enterprise Dashboard',
+    '/enterprise/waste-requests': 'Waste Requests',
+    '/enterprise/task-assignment': 'Task Assignment',
+    '/enterprise/tracking': 'Real-time Tracking',
+    '/enterprise/analytics': 'Reports & Analytics',
+    '/enterprise/reward-rules': 'Reward Rules',
+    // Collector routes
+    '/collector/dashboard': 'Collector Dashboard',
+    '/collector/tasks': 'Assigned Tasks',
+    '/collector/history': 'Work History',
+    '/collector/profile': 'Profile',
   };
 
-  // Check for detail pages
+  // Citizen detail pages
   if (pathname.match(/^\/reports\/[^/]+$/)) {
     return 'Report Details';
+  }
+
+  // Collector task detail page
+  if (pathname.match(/^\/collector\/tasks\/[^/]+$/)) {
+    return 'Task Detail';
   }
 
   return routes[pathname] || 'Dashboard';
